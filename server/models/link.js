@@ -54,5 +54,5 @@ class Links extends Model {
     return super.create.call(this, link);
   }
 }
-
+                                                                                                   
 module.exports = new Links();

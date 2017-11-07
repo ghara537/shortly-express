@@ -17,18 +17,69 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 
 
-app.get('/', 
-(req, res) => {
+app.get('/', (req, res, next) => {
+  res.render('index');
+  parseCookies(req, res, next);
+  // req.cookie = parseCookies(req, res, next);
+  // req.cookies = 
+  console.log('REQ COOKIES!!! = ', req.cookie);
+  res.sendStatus(200);
+  //next();
+});
+
+app.get('/signup', (req, res) => {
+  res.render('signup');
+});
+
+
+app.post('/signup', (req, res) => {
+  models.Users.get({'username': req.body.username})
+    .then((data) => { 
+      // console.log('DATA: ', data)
+      if (data === undefined) {
+        models.Users.create(req.body)
+          .then((data) => {
+            res.redirect('/');
+          })
+          .catch((err) => {
+            res.sendStatus(201);
+          });
+      } else {
+        res.redirect('/signup');
+      }
+    });
+});
+
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+
+app.post('/login', (req, res) => {
+  models.Users.get({'username': req.body.username})
+    .then((data) => {
+      if (data) {
+        var authenticated = models.Users.compare(req.body.password, data.password, data.salt);
+        if (authenticated) {
+          res.redirect('/');
+        } else {
+          res.redirect('/login');
+          console.log('Invalid Password');
+        }
+      } else {
+        res.redirect('/login');
+        console.log('Invalid Username');
+      }
+    });
+});
+
+
+app.get('/create', (req, res) => {
+  console.log('COOKIE:', req.cookie);
+  console.log('Cookies:', req.cookies);
   res.render('index');
 });
 
-app.get('/create', 
-(req, res) => {
-  res.render('index');
-});
-
-app.get('/links', 
-(req, res, next) => {
+app.get('/links', (req, res, next) => {
   models.Links.getAll()
     .then(links => {
       res.status(200).send(links);
@@ -38,8 +89,7 @@ app.get('/links',
     });
 });
 
-app.post('/links', 
-(req, res, next) => {
+app.post('/links', (req, res, next) => {
   var url = req.body.url;
   if (!models.Links.isValidUrl(url)) {
     // send back a 404 if link is not valid

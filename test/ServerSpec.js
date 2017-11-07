@@ -24,7 +24,9 @@ describe('', function() {
   var clearDB = function(connection, tablenames, done) {
     var count = 0;
     tablenames.forEach(function(tablename) {
-      connection.query('DROP TABLE IF EXISTS ' + tablename, function() {
+      connection.query('DROP TABLE IF EXISTS ' + tablename, function(err, result) {
+        // console.log('ERROR: ', err);
+        // console.log('RESULT: ', result);
         count++;
         if (count === tablenames.length) {
           return schema(db).then(done);
@@ -53,7 +55,9 @@ describe('', function() {
       if (err) { return done(err); }
       /* Empties the db table before each test so that multiple tests
        * (or repeated runs of the tests) won't screw each other up: */
+      //console.log('BEFORE clearDB');
       clearDB(db, tablenames, function() {
+        //console.log('AFTER clearDB');
         server = app.listen(port, done);
       });
     });
@@ -109,6 +113,7 @@ describe('', function() {
         password: 'p@ssw0rd'
       };
       db.query('INSERT INTO users SET ?', newUser, function(error, result) {
+        //console.log('ERROR: ', error);
         var newUserId = result.insertId;
         var otherUser = {
           username: 'Muhammed',
@@ -123,7 +128,7 @@ describe('', function() {
     });
   });
 
-  xdescribe('Account Creation:', function() {
+  describe('Account Creation:', function() {
 
     it('signup creates a new user record', function(done) {
       var options = {
@@ -140,6 +145,7 @@ describe('', function() {
         db.query(queryString, function(err, rows) {
           if (err) { done(err); }
           var user = rows[0];
+          //console.log('USER: ', user);
           expect(user).to.exist;
           expect(user.username).to.equal('Samantha');
           done();
@@ -208,7 +214,7 @@ describe('', function() {
     });
   });
 
-  xdescribe('Account Login:', function() {
+  describe('Account Login:', function() {
 
     beforeEach(function(done) {
       var options = {
@@ -277,7 +283,7 @@ describe('', function() {
     });
   });
 
-  xdescribe('Sessions Schema:', function() {
+  describe('Sessions Schema:', function() {
     it('contains a sessions table', function(done) {
       var queryString = 'SELECT * FROM sessions';
       db.query(queryString, function(err, results) {
@@ -325,7 +331,7 @@ describe('', function() {
     });
   });
 
-  xdescribe('Express Middleware', function() {
+  describe('Express Middleware', function() {
     var cookieParser = require('../server/middleware/cookieParser.js');
     var createSession = require('../server/middleware/auth.js').createSession;
 

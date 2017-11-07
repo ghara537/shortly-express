@@ -21,6 +21,8 @@ module.exports = (db) => {
           id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
           linkId INT
         );`);
+      // FOREIGN KEY (linkId)
+      //     REFERENCES links(id)
     })
     .then(() => {
       // Create users table
@@ -38,8 +40,10 @@ module.exports = (db) => {
         CREATE TABLE IF NOT EXISTS sessions (
           id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
           hash VARCHAR(64),
-          userId INT
+          userId INT 
         )`);
+      // FOREIGN KEY (userId) 
+      // REFERENCES users(id)
     })
     .error(err => {
       console.log(err);
