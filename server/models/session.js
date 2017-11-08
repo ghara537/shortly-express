@@ -36,6 +36,7 @@ class Sessions extends Model {
     return super.get.call(this, options)
       .then(session => {
         if (!session || !session.userId) {
+          // console.log('IN SESSION GET IF BLOCK');
           return session;
         }
         return Users.get({ id: session.userId }).then(user => {

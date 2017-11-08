@@ -5,6 +5,7 @@ const partials = require('express-partials');
 const bodyParser = require('body-parser');
 const Auth = require('./middleware/auth');
 const models = require('./models');
+const parseCookies = require('./middleware/cookieParser');
 
 const app = express();
 
@@ -20,11 +21,11 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.get('/', (req, res, next) => {
   res.render('index');
   parseCookies(req, res, next);
-  // req.cookie = parseCookies(req, res, next);
-  // req.cookies = 
-  console.log('REQ COOKIES!!! = ', req.cookie);
-  res.sendStatus(200);
-  //next();
+  Auth.createSession(req, res, next);
+  console.log('RES', res);
+  // if (!models.Sessions.isLoggedIn) {
+  //   res.redirect('/login');
+  // }
 });
 
 app.get('/signup', (req, res) => {
@@ -32,14 +33,15 @@ app.get('/signup', (req, res) => {
 });
 
 
-app.post('/signup', (req, res) => {
+app.post('/signup', (req, res, next) => {
+  console.log('INSIDE SIGNUP POST');
   models.Users.get({'username': req.body.username})
-    .then((data) => { 
-      // console.log('DATA: ', data)
-      if (data === undefined) {
+    .then((userInfo) => { 
+      if (userInfo === undefined) {
         models.Users.create(req.body)
-          .then((data) => {
-            res.redirect('/');
+          .then(() => {
+            console.log('INSIDE .THEN OF USERS CREATE');
+            Auth.createSession(req, res, next);
           })
           .catch((err) => {
             res.sendStatus(201);
@@ -54,20 +56,22 @@ app.get('/login', (req, res) => {
   res.render('login');
 });
 
-app.post('/login', (req, res) => {
+app.post('/login', (req, res, next) => {
   models.Users.get({'username': req.body.username})
     .then((data) => {
       if (data) {
         var authenticated = models.Users.compare(req.body.password, data.password, data.salt);
         if (authenticated) {
-          res.redirect('/');
+          //create a new session
+          Auth.createSession(req, res, next);
+          // next();
         } else {
           res.redirect('/login');
-          console.log('Invalid Password');
+          // console.log('Invalid Password');
         }
       } else {
         res.redirect('/login');
-        console.log('Invalid Username');
+        // console.log('Invalid Username');
       }
     });
 });

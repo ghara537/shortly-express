@@ -407,15 +407,22 @@ describe('', function() {
 
         var requestWithoutCookie = httpMocks.createRequest();
         var response = httpMocks.createResponse();
+        // console.log('requestWithoutCookie Headers = ', requestWithoutCookie.headers);
+        // console.log('response.cookie = ', response.cookies);
 
         createSession(requestWithoutCookie, response, function() {
           var cookie = response.cookies.shortlyid.value;
+          // console.log('COOKIE', cookie);
           var secondResponse = httpMocks.createResponse();
           var requestWithCookies = httpMocks.createRequest();
           requestWithCookies.cookies.shortlyid = cookie;
 
           createSession(requestWithCookies, secondResponse, function() {
             var session = requestWithCookies.session;
+
+            // console.log('session', session);
+            // console.log('session.hash', session.hash);
+
             expect(session).to.be.an('object');
             expect(session.hash).to.exist;
             expect(session.hash).to.be.cookie;
@@ -486,7 +493,7 @@ describe('', function() {
     });
   });
 
-  xdescribe('Sessions and cookies', function() {
+  describe.only('Sessions and cookies', function() {
     var requestWithSession;
     var cookieJar;
 
@@ -507,6 +514,7 @@ describe('', function() {
     beforeEach(function(done) {
       cookieJar = request.jar();
       requestWithSession = request.defaults({ jar: cookieJar });
+      //console.log('REQ WITH SESSION', requestWithSession);
       done();
     });
 
